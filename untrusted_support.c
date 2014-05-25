@@ -48,6 +48,8 @@ void *_calloc_r(struct _reent *ptr, size_t size, size_t len) {
 }
 
 
+int sandboxed_write(int fd, const void *buf, size_t count);
+
 int open(char const *pathname, int oflag, ...) {
   __builtin_trap();
 }
@@ -69,7 +71,7 @@ int close(int fd) {
 }
 
 int write(int fd, const void *buf, size_t count) {
-  __builtin_trap();
+  return sandboxed_write(fd, buf, count);
 }
 
 int read(int fd, void *buf, size_t count) {
@@ -90,4 +92,9 @@ int chdir(const char *path) {
 
 int utime(const char *filename, const struct utimbuf *buf) {
   __builtin_trap();
+}
+
+
+int _start(int argc, char **argv) {
+  return main(argc, argv);
 }
