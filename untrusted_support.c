@@ -1,4 +1,5 @@
 
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -55,7 +56,8 @@ int open(char const *pathname, int oflag, ...) {
 }
 
 int fstat(int fd, struct stat *st) {
-  __builtin_trap();
+  errno = ENOSYS;
+  return -1;
 }
 
 int isatty(int fd) {
@@ -95,6 +97,14 @@ int utime(const char *filename, const struct utimbuf *buf) {
 }
 
 
+int main(int argc, char **argv);
+
+void __newlib_thread_init(void);
+void __libc_init_array(void);
+
 int _start(int argc, char **argv) {
+  __newlib_thread_init();
+  __libc_init_array();
+
   return main(argc, argv);
 }

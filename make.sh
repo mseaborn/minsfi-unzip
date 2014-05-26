@@ -37,6 +37,7 @@ pnacl-ld -r $obj_files -lc -o out/unzip_prog.before.bc
 # Of the sandboxing passes, "-sandbox-indirect-calls" must come last.
 # "-strip-debug" is currently required by "-sandbox-indirect-calls".
 pnacl-opt \
+    -strip-tls \
     -pnacl-abi-simplify-preopt \
     -globaldce \
     -pnacl-abi-simplify-postopt \

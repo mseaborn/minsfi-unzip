@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <unistd.h>
 
 void func1(void) {
@@ -21,6 +22,9 @@ int main() {
   func1_ptr();
   func2_ptr(1);
   func2(1);
+
+  fprintf(stderr, "Hello world to stderr, via printf()\n");
+  printf("Hello world to stdout, via printf()\n");
 
   return 0;
 }

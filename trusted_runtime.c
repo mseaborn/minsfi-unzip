@@ -48,7 +48,7 @@ static void init_sandbox() {
 
 int sandboxed_write(int fd, sb_ptr_t sb_buf, sb_size_t size) {
   void *buf = from_sandbox_addr_range(sb_buf, size);
-  assert(fd == 1);
+  assert(fd == 1 || fd == 2);
   return write(fd, buf, size);
 }
 
