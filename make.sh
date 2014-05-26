@@ -35,6 +35,7 @@ pnacl-ld -r $obj_files -lc -o out/unzip_prog.before.bc
 # We run -globaldce to remove some dead code (-std-link-opts doesn't
 # seem to work for that).
 # Of the sandboxing passes, "-sandbox-indirect-calls" must come last.
+# "-strip-debug" is currently required by "-sandbox-indirect-calls".
 pnacl-opt \
     -pnacl-abi-simplify-preopt \
     -globaldce \
