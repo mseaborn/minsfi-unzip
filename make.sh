@@ -34,11 +34,14 @@ done
 pnacl-ld -r $obj_files -lc -o out/unzip_prog.before.bc
 # We run -globaldce to remove some dead code (-std-link-opts doesn't
 # seem to work for that).
+# Of the sandboxing passes, "-sandbox-indirect-calls" must come last.
 pnacl-opt \
     -pnacl-abi-simplify-preopt \
     -globaldce \
     -pnacl-abi-simplify-postopt \
-    -expand-allocas -allocate-data-segment -sandbox-memory-accesses \
+    -strip-debug \
+    -expand-allocas -allocate-data-segment \
+    -sandbox-memory-accesses -sandbox-indirect-calls \
     out/unzip_prog.before.bc -o out/unzip_prog.bc
 $tc_bin/llc -mtriple=x86_64-linux-gnu -relocation-model=pic -filetype=obj \
     out/unzip_prog.bc -o out/unzip_prog.o
