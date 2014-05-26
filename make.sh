@@ -10,16 +10,16 @@ zlib_dir=$chromium_dir/third_party/zlib
 rm -rf out
 mkdir -p out
 
-# files=""
-# for f in inflate.c inftrees.c inffast.c adler32.c crc32.c zutil.c \
-#          contrib/minizip/ioapi.c \
-#          contrib/minizip/miniunz.c \
-#          contrib/minizip/unzip.c \
-#          ; do
-#   files="$files $zlib_dir/$f"
-# done
+files=""
+for f in inflate.c inftrees.c inffast.c adler32.c crc32.c zutil.c \
+         contrib/minizip/ioapi.c \
+         contrib/minizip/miniunz.c \
+         contrib/minizip/unzip.c \
+         ; do
+  files="$files $zlib_dir/$f"
+done
 
-files="minsfi_test.c"
+# files="minsfi_test.c"
 files="$files $nacl_dir/src/untrusted/nacl/lock.c untrusted_support.c"
 
 # USE_FILE32API tells ioapi.c not to use fopen64().
@@ -50,3 +50,13 @@ $tc_bin/llc -mtriple=x86_64-linux-gnu -relocation-model=pic -filetype=obj \
 objcopy --redefine-sym _start=sandbox_entry out/unzip_prog.o out/unzip_prog.o
 gcc -m64 -Wall -Werror trusted_runtime.c out/unzip_prog.o -o out/unzip_prog
 ./out/unzip_prog
+
+# Test
+
+rm -rf tmp
+# Make a test zip file
+mkdir -p tmp/test
+cp ./out/unzip_prog untrusted_support.c tmp/test/
+(cd tmp/test && zip -r ../test.zip .)
+# Test listing contents
+./out/unzip_prog -l tmp/test.zip

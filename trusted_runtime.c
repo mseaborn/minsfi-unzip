@@ -1,5 +1,6 @@
 
 #include <assert.h>
+#include <fcntl.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,8 @@
 /* Type for sandboxed pointers, which are 32-bit. */
 typedef uint32_t sb_ptr_t;
 typedef uint32_t sb_size_t;
+
+typedef int64_t nacl_irt_off_t;
 
 /* Template data for the data segment. */
 extern char __sfi_data_segment[];
@@ -26,6 +29,10 @@ uint64_t __sfi_memory_base;
 
 void sandbox_entry(int argc, sb_ptr_t argv);
 
+
+static void *from_sandbox_addr(sb_ptr_t addr) {
+  return (void *) (__sfi_memory_base + addr);
+}
 
 static void *from_sandbox_addr_range(sb_ptr_t addr, sb_size_t size) {
   assert(addr + size >= addr);
@@ -49,10 +56,28 @@ static void init_sandbox() {
   copy_in(data_segment_dest, __sfi_data_segment, __sfi_data_segment_size);
 }
 
+int sandboxed_open(sb_ptr_t sb_filename, int flags, int mode) {
+  const char *filename = from_sandbox_addr(sb_filename);
+  return open(filename, flags, mode);
+}
+
+int sandboxed_close(int fd) {
+  return close(fd);
+}
+
+int sandboxed_read(int fd, sb_ptr_t sb_buf, sb_size_t size) {
+  void *buf = from_sandbox_addr_range(sb_buf, size);
+  return read(fd, buf, size);
+}
+
 int sandboxed_write(int fd, sb_ptr_t sb_buf, sb_size_t size) {
   void *buf = from_sandbox_addr_range(sb_buf, size);
   assert(fd == 1 || fd == 2);
   return write(fd, buf, size);
+}
+
+nacl_irt_off_t sandboxed_lseek(int fd, nacl_irt_off_t offset, int whence) {
+  return lseek(fd, offset, whence);
 }
 
 /* Allocate memory in the sandbox's address space. */

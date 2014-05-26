@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -49,10 +50,25 @@ void *_calloc_r(struct _reent *ptr, size_t size, size_t len) {
 }
 
 
+int sandboxed_open(char const *pathname, int flags, int mode);
+int sandboxed_close(int fd);
+off_t sandboxed_lseek(int fd, off_t offset, int whence);
+int sandboxed_read(int fd, void *buf, size_t count);
 int sandboxed_write(int fd, const void *buf, size_t count);
 
-int open(char const *pathname, int oflag, ...) {
-  __builtin_trap();
+int open(char const *pathname, int flags, ...) {
+  mode_t mode = 0;
+  if (flags & O_CREAT) {
+    va_list ap;
+    va_start(ap, flags);
+    mode = va_arg(ap, mode_t);
+    va_end(ap);
+  }
+  return sandboxed_open(pathname, flags, mode);
+}
+
+int close(int fd) {
+  return sandboxed_close(fd);
 }
 
 int fstat(int fd, struct stat *st) {
@@ -65,19 +81,15 @@ int isatty(int fd) {
 }
 
 off_t lseek(int fd, off_t offset, int whence) {
-  __builtin_trap();
+  return sandboxed_lseek(fd, offset, whence);
 }
 
-int close(int fd) {
-  __builtin_trap();
+int read(int fd, void *buf, size_t count) {
+  return sandboxed_read(fd, buf, count);
 }
 
 int write(int fd, const void *buf, size_t count) {
   return sandboxed_write(fd, buf, count);
-}
-
-int read(int fd, void *buf, size_t count) {
-  __builtin_trap();
 }
 
 void _exit(int status) {
