@@ -15,7 +15,7 @@ void func2(int fd) {
 void (*func1_ptr)(void) = func1;
 void (*func2_ptr)(int fd) = func2;
 
-int main() {
+int main(int argc, char **argv) {
   static const char str[] = "Hello, world!\n";
   write(1, str, sizeof(str) - 1);
 
@@ -25,6 +25,12 @@ int main() {
 
   fprintf(stderr, "Hello world to stderr, via printf()\n");
   printf("Hello world to stdout, via printf()\n");
+
+  printf("argc = %i\n", argc);
+  int i;
+  for (i = 0; i < argc; i++) {
+    printf("argv[%i] = \"%s\"\n", i, argv[i]);
+  }
 
   return 0;
 }

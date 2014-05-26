@@ -48,5 +48,5 @@ pnacl-opt \
 $tc_bin/llc -mtriple=x86_64-linux-gnu -relocation-model=pic -filetype=obj \
     out/unzip_prog.bc -o out/unzip_prog.o
 objcopy --redefine-sym _start=sandbox_entry out/unzip_prog.o out/unzip_prog.o
-gcc -m64 trusted_runtime.c out/unzip_prog.o -o out/unzip_prog
+gcc -m64 -Wall -Werror trusted_runtime.c out/unzip_prog.o -o out/unzip_prog
 ./out/unzip_prog
