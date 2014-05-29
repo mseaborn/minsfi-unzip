@@ -27,7 +27,7 @@ static sb_ptr_t next_alloc;
 
 uint64_t __sfi_memory_base;
 
-void sandbox_entry(int argc, sb_ptr_t argv);
+int sandbox_entry(int argc, sb_ptr_t argv);
 
 
 static void *from_sandbox_addr(sb_ptr_t addr) {
@@ -106,6 +106,5 @@ int main(int argc, char **argv) {
     copy_in(argv_copy + i * sizeof(sb_ptr_t), &arg_copy, sizeof(arg_copy));
   }
 
-  sandbox_entry(argc, argv_copy);
-  return 0;
+  return sandbox_entry(argc, argv_copy);
 }
