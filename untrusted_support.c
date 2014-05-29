@@ -9,6 +9,11 @@
 unsigned __sfi_stack = 0x40000000;
 
 
+/* Copied from pnacl/support/bitcode/crti.c */
+void _init(void) {
+}
+
+
 static uintptr_t next_alloc = 0x10000000;
 
 void *malloc(size_t size) {
