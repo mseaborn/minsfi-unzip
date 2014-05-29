@@ -19,6 +19,7 @@ output="$2"
 # "-strip-debug" is currently required by "-sandbox-indirect-calls".
 pnacl-opt \
     -strip-tls \
+    -loweratomic \
     -pnacl-abi-simplify-preopt \
     -globaldce \
     -pnacl-abi-simplify-postopt \
