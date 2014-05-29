@@ -3,12 +3,26 @@
 set -eux
 
 nacl_dir=~/devel/nacl-git3/native_client
-tc_bin=$nacl_dir/toolchain/pnacl_linux_x86/host_x86_64/bin
 chromium_dir=~/devel/newgit-chromium/src
 zlib_dir=$chromium_dir/third_party/zlib
 
 rm -rf out
 mkdir -p out
+
+
+# Build and run minsfi_test
+
+cflags="-Wall -Werror"
+pnacl-clang $cflags -c $nacl_dir/src/untrusted/nacl/lock.c -o out/lock.c.o
+pnacl-clang $cflags -c untrusted_support.c -o out/untrusted_support.c.o
+pnacl-clang $cflags -c minsfi_test.c -o out/minsfi_test.c.o
+pnacl-ld -r out/lock.c.o out/untrusted_support.c.o out/minsfi_test.c.o -lc \
+    -o out/minsfi_test.before.bc
+./link_nonsfi_prog.sh out/minsfi_test.before.bc out/minsfi_test
+./out/minsfi_test
+
+
+# Build and run unzip_prog
 
 files=""
 for f in inflate.c inftrees.c inffast.c adler32.c crc32.c zutil.c \
@@ -18,8 +32,6 @@ for f in inflate.c inftrees.c inffast.c adler32.c crc32.c zutil.c \
          ; do
   files="$files $zlib_dir/$f"
 done
-
-# files="minsfi_test.c"
 files="$files $nacl_dir/src/untrusted/nacl/lock.c untrusted_support.c"
 
 # USE_FILE32API tells ioapi.c not to use fopen64().
@@ -32,23 +44,7 @@ for file in $files; do
 done
 
 pnacl-ld -r $obj_files -lc -o out/unzip_prog.before.bc
-# We run -globaldce to remove some dead code (-std-link-opts doesn't
-# seem to work for that).
-# Of the sandboxing passes, "-sandbox-indirect-calls" must come last.
-# "-strip-debug" is currently required by "-sandbox-indirect-calls".
-pnacl-opt \
-    -strip-tls \
-    -pnacl-abi-simplify-preopt \
-    -globaldce \
-    -pnacl-abi-simplify-postopt \
-    -strip-debug \
-    -expand-allocas -allocate-data-segment \
-    -sandbox-memory-accesses -sandbox-indirect-calls \
-    out/unzip_prog.before.bc -o out/unzip_prog.bc
-$tc_bin/llc -mtriple=x86_64-linux-gnu -relocation-model=pic -filetype=obj \
-    out/unzip_prog.bc -o out/unzip_prog.o
-objcopy --redefine-sym _start=sandbox_entry out/unzip_prog.o out/unzip_prog.o
-gcc -m64 -Wall -Werror trusted_runtime.c out/unzip_prog.o -o out/unzip_prog
+./link_nonsfi_prog.sh out/unzip_prog.before.bc out/unzip_prog
 ./out/unzip_prog
 
 # Test

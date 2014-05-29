@@ -50,6 +50,8 @@ void *_calloc_r(struct _reent *ptr, size_t size, size_t len) {
 }
 
 
+struct utimbuf;
+
 int sandboxed_open(const char *pathname, int flags, int mode);
 int sandboxed_chdir(const char *pathname);
 
