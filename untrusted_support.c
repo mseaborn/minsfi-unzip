@@ -119,6 +119,14 @@ int utime(const char *filename, const struct utimbuf *buf) {
 }
 
 
+/* libnacl does not include this: */
+
+long pathconf(const char *path, int name) {
+  errno = ENOSYS;
+  return -1;
+}
+
+
 int main(int argc, char **argv);
 
 void __newlib_thread_init(void);
