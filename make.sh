@@ -60,3 +60,8 @@ cp ./out/unzip_prog untrusted_support.c tmp/test/
 (cd tmp/test && zip -r ../test.zip .)
 # Test listing contents
 ./out/unzip_prog -l tmp/test.zip
+# Test extracting
+rm -rf tmp/extract
+mkdir tmp/extract
+./out/unzip_prog tmp/test.zip -d tmp/extract
+diff -r tmp/test tmp/extract

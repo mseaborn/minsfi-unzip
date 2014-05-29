@@ -50,13 +50,15 @@ void *_calloc_r(struct _reent *ptr, size_t size, size_t len) {
 }
 
 
-int sandboxed_open(char const *pathname, int flags, int mode);
+int sandboxed_open(const char *pathname, int flags, int mode);
+int sandboxed_chdir(const char *pathname);
+
 int sandboxed_close(int fd);
 off_t sandboxed_lseek(int fd, off_t offset, int whence);
 int sandboxed_read(int fd, void *buf, size_t count);
 int sandboxed_write(int fd, const void *buf, size_t count);
 
-int open(char const *pathname, int flags, ...) {
+int open(const char *pathname, int flags, ...) {
   mode_t mode = 0;
   if (flags & O_CREAT) {
     va_list ap;
@@ -101,11 +103,12 @@ int mkdir(const char *path, mode_t mode) {
 }
 
 int chdir(const char *path) {
-  __builtin_trap();
+  return sandboxed_chdir(path);
 }
 
 int utime(const char *filename, const struct utimbuf *buf) {
-  __builtin_trap();
+  errno = ENOSYS;
+  return -1;
 }
 
 

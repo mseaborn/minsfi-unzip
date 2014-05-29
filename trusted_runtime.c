@@ -61,6 +61,10 @@ int sandboxed_open(sb_ptr_t sb_filename, int flags, int mode) {
   return open(filename, flags, mode);
 }
 
+int sandboxed_chdir(sb_ptr_t sb_filename) {
+  return chdir(from_sandbox_addr(sb_filename));
+}
+
 int sandboxed_close(int fd) {
   return close(fd);
 }
@@ -72,7 +76,6 @@ int sandboxed_read(int fd, sb_ptr_t sb_buf, sb_size_t size) {
 
 int sandboxed_write(int fd, sb_ptr_t sb_buf, sb_size_t size) {
   void *buf = from_sandbox_addr_range(sb_buf, size);
-  assert(fd == 1 || fd == 2);
   return write(fd, buf, size);
 }
 
